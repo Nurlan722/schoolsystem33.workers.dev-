@@ -1,0 +1,13 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "school-system33",
+  "main": "./worker.js",
+  "compatibility_date": "2026-09-30",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS"
+  },
+  "triggers": {
+    "crons": ["0 1 * * *"]
+  }
+}
