@@ -213,14 +213,14 @@ function mapExtents(){const base=list().filter(o=>o.type==="wall"&&o.layer==="wa
 function transform(){const b=mapExtents(),margin=30;const fit=Math.min((viewport.clientWidth-2*margin)/b.w,(viewport.clientHeight-2*margin)/b.h);const s=Math.max(.01,fit)*scale;return{s,x:(viewport.clientWidth-b.w*s)/2-b.x*s+(edit?panX:0),y:(viewport.clientHeight-b.h*s)/2-b.y*s+(edit?panY:0)};}
 function snapWall(ax,ay,bx,by){const dx=bx-ax,dy=by-ay;if(Math.abs(dy)<=Math.max(8,Math.abs(dx)*.18))by=ay;else if(Math.abs(dx)<=Math.max(8,Math.abs(dy)*.18))bx=ax;return{x:bx,y:by};}
 function toWorld(e){const r=viewport.getBoundingClientRect(),t=transform();return{x:(e.clientX-r.left-t.x)/t.s,y:(e.clientY-r.top-t.y)/t.s};}
-function strokeLine(o){ctx.strokeStyle=darkMap()&&o.layer==="walls"&&isDefaultColor(o.stroke,["#243449","#1b293b","#26364b"])?"#8193aa":o.stroke||"#243449";ctx.lineWidth=o.width??2.5;ctx.globalAlpha=o.opacity??1;ctx.lineCap="square";ctx.beginPath();ctx.moveTo(o.x,o.y);ctx.lineTo(o.x2,o.y2);ctx.stroke();ctx.globalAlpha=1;}
+function strokeLine(o){ctx.strokeStyle=darkMap()&&isDefaultColor(o.stroke,["#243449","#1b293b","#26364b","#253447"])?"#7388a2":o.stroke||"#243449";ctx.lineWidth=o.width??2.5;ctx.globalAlpha=o.opacity??1;ctx.lineCap="square";ctx.beginPath();ctx.moveTo(o.x,o.y);ctx.lineTo(o.x2,o.y2);ctx.stroke();ctx.globalAlpha=1;}
 const imageCache=new Map();
 function darkMap(){return document.documentElement.dataset.theme==="dark"||document.documentElement.classList.contains("dark")||document.body.classList.contains("dark")||getComputedStyle(document.body).backgroundColor==="rgb(15, 23, 42)"||window.matchMedia("(prefers-color-scheme: dark)").matches&&document.body.classList.contains("dark-mode");}
 function isDefaultColor(value, defaults){return !value||defaults.includes(String(value).toLowerCase());}
 function draw(o){
  if(o.type==="wall"){strokeLine(o);return;}
- if(o.type==="room"){const dm=darkMap();ctx.fillStyle=dm&&isDefaultColor(o.fill,["#ffffff","white"])?"#243449":o.fill||"white";ctx.strokeStyle=dm&&isDefaultColor(o.stroke,["#94a3b8"])?"#64748b":o.stroke||"#94a3b8";ctx.lineWidth=o.width??1.4;ctx.globalAlpha=o.opacity??1;ctx.fillRect(o.x,o.y,o.w,o.h);ctx.strokeRect(o.x,o.y,o.w,o.h);ctx.fillStyle=dm&&isDefaultColor(o.color,["#1e293b"])?"#f1f5f9":o.color||"#1e293b";ctx.globalAlpha=1;ctx.font=`${o.bold===false?"":"bold "}${o.fontSize||14}px ${o.fontFamily||"system-ui"}`;ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(o.text||"",o.x+o.w/2,o.y+o.h/2);return;}
- if(o.type==="text"){ctx.font=`${o.bold?"bold ":""}${o.fontSize||18}px system-ui`;ctx.textAlign="left";ctx.textBaseline="top";ctx.fillStyle=o.color||"#15243b";ctx.fillText(o.text||"",o.x,o.y);return;}
+ if(o.type==="room"){const dm=darkMap();ctx.fillStyle=dm&&isDefaultColor(o.fill,["#ffffff","white"])?"#263a53":o.fill||"white";ctx.strokeStyle=dm&&isDefaultColor(o.stroke,["#94a3b8"])?"#64748b":o.stroke||"#94a3b8";ctx.lineWidth=o.width??1.4;ctx.globalAlpha=o.opacity??1;ctx.fillRect(o.x,o.y,o.w,o.h);ctx.strokeRect(o.x,o.y,o.w,o.h);ctx.fillStyle=dm&&isDefaultColor(o.color,["#1e293b","#15243b"])?"#f1f5fa":o.color||"#1e293b";ctx.globalAlpha=1;ctx.font=`${o.bold===false?"":"bold "}${o.fontSize||14}px ${o.fontFamily||"system-ui"}`;ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(o.text||"",o.x+o.w/2,o.y+o.h/2);return;}
+ if(o.type==="text"){ctx.font=`${o.bold?"bold ":""}${o.fontSize||18}px system-ui`;ctx.textAlign="left";ctx.textBaseline="top";ctx.fillStyle=darkMap()&&isDefaultColor(o.color,["#15243b","#1e293b"])?"#f1f5fa":o.color||"#15243b";ctx.fillText(o.text||"",o.x,o.y);return;}
  if(o.type==="image"||o.type==="icon"){
  let im=imageCache.get(o.src);if(!im){im=new Image();im.onload=render;im.onerror=()=>{console.warn("Не удалось загрузить изображение карты:",o.src);};imageCache.set(o.src,im);im.src=o.src;}
  if(im.complete&&im.naturalWidth)ctx.drawImage(im,o.x,o.y,o.w,o.h);
@@ -579,7 +579,7 @@ window.addEventListener("focus",verifyAdmin);
  window.addEventListener("message",e=>{if(e.origin===location.origin&&e.data?.type==="school33-admin-changed")verifyAdmin();});
  setInterval(()=>{if(token()!==lastToken||(!token()&&canEdit))verifyAdmin();},400);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)verifyAdmin();});
-function syncTheme(theme){document.documentElement.dataset.theme=theme==="dark"?"dark":"light";}
+function syncTheme(theme){document.documentElement.dataset.theme=theme==="dark"?"dark":"light";requestAnimationFrame(render);}
 window.addEventListener("message",e=>{if(e.origin===location.origin&&e.data?.type==="school33-theme")syncTheme(e.data.theme);});
 try{syncTheme(parent.document.documentElement.dataset.theme || localStorage.getItem("school33-theme"));}catch{syncTheme(localStorage.getItem("school33-theme"));}
 try{new MutationObserver(()=>syncTheme(parent.document.documentElement.dataset.theme)).observe(parent.document.documentElement,{attributes:true,attributeFilter:["data-theme"]});}catch{}
