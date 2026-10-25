@@ -214,7 +214,25 @@ function transform(){const b=mapExtents(),margin=30;const fit=Math.min((viewport
 function snapWall(ax,ay,bx,by){const dx=bx-ax,dy=by-ay;if(Math.abs(dy)<=Math.max(8,Math.abs(dx)*.18))by=ay;else if(Math.abs(dx)<=Math.max(8,Math.abs(dy)*.18))bx=ax;return{x:bx,y:by};}
 function toWorld(e){const r=viewport.getBoundingClientRect(),t=transform();return{x:(e.clientX-r.left-t.x)/t.s,y:(e.clientY-r.top-t.y)/t.s};}
 function strokeLine(o){ctx.strokeStyle=darkMap()&&isDefaultColor(o.stroke,["#243449","#1b293b","#26364b","#253447"])?"#7388a2":o.stroke||"#243449";ctx.lineWidth=o.width??2.5;ctx.globalAlpha=o.opacity??1;ctx.lineCap="square";ctx.beginPath();ctx.moveTo(o.x,o.y);ctx.lineTo(o.x2,o.y2);ctx.stroke();ctx.globalAlpha=1;}
-const imageCache=new Map();
+const imageCache=new Map(),darkImageCache=new WeakMap();
+function darkMapIcon(im){
+ if(darkImageCache.has(im))return darkImageCache.get(im);
+ try{
+  const c=document.createElement('canvas');c.width=im.naturalWidth;c.height=im.naturalHeight;
+  const g=c.getContext('2d',{willReadFrequently:true});g.drawImage(im,0,0);
+  const pixels=g.getImageData(0,0,c.width,c.height),v=pixels.data;
+  for(let i=0;i<v.length;i+=4){
+   if(v[i+3]<8)continue;
+   const r=v[i],gr=v[i+1],b=v[i+2],max=Math.max(r,gr,b),min=Math.min(r,gr,b);
+   if(max-min<30){
+    if(min>220){v[i]=17;v[i+1]=24;v[i+2]=39;}
+    else if(max<115){v[i]=239;v[i+1]=245;v[i+2]=250;}
+   }
+  }
+  g.putImageData(pixels,0,0);darkImageCache.set(im,c);return c;
+ }catch{darkImageCache.set(im,im);return im;}
+}
+
 function darkMap(){return document.documentElement.dataset.theme==="dark"||document.documentElement.classList.contains("dark")||document.body.classList.contains("dark")||getComputedStyle(document.body).backgroundColor==="rgb(15, 23, 42)"||window.matchMedia("(prefers-color-scheme: dark)").matches&&document.body.classList.contains("dark-mode");}
 function isDefaultColor(value, defaults){return !value||defaults.includes(String(value).toLowerCase());}
 function draw(o){
@@ -223,7 +241,7 @@ function draw(o){
  if(o.type==="text"){ctx.font=`${o.bold?"bold ":""}${o.fontSize||18}px system-ui`;ctx.textAlign="left";ctx.textBaseline="top";ctx.fillStyle=darkMap()&&isDefaultColor(o.color,["#15243b","#1e293b"])?"#f1f5fa":o.color||"#15243b";ctx.fillText(o.text||"",o.x,o.y);return;}
  if(o.type==="image"||o.type==="icon"){
  let im=imageCache.get(o.src);if(!im){im=new Image();im.onload=render;im.onerror=()=>{console.warn("Не удалось загрузить изображение карты:",o.src);};imageCache.set(o.src,im);im.src=o.src;}
- if(im.complete&&im.naturalWidth)ctx.drawImage(im,o.x,o.y,o.w,o.h);
+ if(im.complete&&im.naturalWidth)ctx.drawImage(darkMap()?darkMapIcon(im):im,o.x,o.y,o.w,o.h);
  }
 }
 function bounds(o){if(o.type==="wall")return{x:Math.min(o.x,o.x2)-5,y:Math.min(o.y,o.y2)-5,w:Math.abs(o.x2-o.x)+10,h:Math.abs(o.y2-o.y)+10};if(o.type==="text"){ctx.font=`${o.fontSize||18}px system-ui`;return{x:o.x,y:o.y,w:Math.max(20,ctx.measureText(o.text||"").width),h:(o.fontSize||18)*1.3};}return{x:o.x,y:o.y,w:o.w,h:o.h};}
@@ -267,7 +285,7 @@ function navFindRoute(){
  const aPick=navVisualPicks.find(p=>p.letter==='A'),bPick=navVisualPicks.find(p=>p.letter==='B');
  navRoute=[];navAutoPoints=[];
  if(!aPick||!bPick){navInfo('Установите на карте обе точки: А и Б.');render();return;}
- const auto=navAutomaticRoute(aPick,bPick);if(auto){navAutoPoints=auto.slice(1,-1).map((p,i)=>({...p,id:'auto-'+i}));navRoute=['__A',...navAutoPoints.map(p=>p.id),'__B'];navInfo('Синий маршрут построен по проходам карты. Проверьте его перед использованием.');render();return;}
+ // Automatic wall-grid routing disabled: open exterior space can look passable.\n // Only administrator-defined corridor links are eligible for routes.
  const graph=navGraph(),nodes=[...graph.nodes],adj=new Map(nodes.map(n=>[n.id,[]]));
  for(const e of graph.edges){const a=navNode(e.a),b=navNode(e.b);if(!a||!b)continue;
   if(a.floor!==b.floor&&!(['stairs','lift'].includes(a.kind)&&a.kind===b.kind&&a.connector&&a.connector===b.connector))continue;
@@ -277,7 +295,7 @@ function navFindRoute(){
  // when that node is nearby. Do not invent a path through walls.
  const attach=(pick,id)=>{
   const nearest=nodes.filter(n=>String(n.floor)===String(pick.floor)).map(n=>({n,d:Math.hypot(n.x-pick.x,n.y-pick.y)})).sort((a,b)=>a.d-b.d)[0];
-  if(!nearest||nearest.d>85)return false;
+  if(!nearest||nearest.d>35)return false;
   adj.set(id,[[nearest.n.id,nearest.d]]);adj.get(nearest.n.id).push([id,nearest.d]);return true;
  };
  if(!attach(aPick,'__A')||!attach(bPick,'__B')){navInfo('Маркеры установлены. Для построения безопасного маршрута настройте маршрутные точки в коридорах рядом с А и Б.');render();return;}
