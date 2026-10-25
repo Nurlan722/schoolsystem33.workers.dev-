@@ -285,7 +285,8 @@ function navFindRoute(){
  const aPick=navVisualPicks.find(p=>p.letter==='A'),bPick=navVisualPicks.find(p=>p.letter==='B');
  navRoute=[];navAutoPoints=[];
  if(!aPick||!bPick){navInfo('Установите на карте обе точки: А и Б.');render();return;}
- // Automatic wall-grid routing disabled: open exterior space can look passable.\n // Only administrator-defined corridor links are eligible for routes.
+ // Automatic wall-grid routing disabled: open exterior space can look passable.
+ // Only administrator-defined corridor links are eligible for routes.
  const graph=navGraph(),nodes=[...graph.nodes],adj=new Map(nodes.map(n=>[n.id,[]]));
  for(const e of graph.edges){const a=navNode(e.a),b=navNode(e.b);if(!a||!b)continue;
   if(a.floor!==b.floor&&!(['stairs','lift'].includes(a.kind)&&a.kind===b.kind&&a.connector&&a.connector===b.connector))continue;
