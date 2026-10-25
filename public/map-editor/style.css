@@ -57,3 +57,10 @@ html[data-theme="dark"] #navPanel{background:#1b2b40;color:#f1f5f9;border-color:
 #roomTooltip{box-sizing:border-box;max-width:min(320px,calc(100% - 16px));min-width:0;max-height:calc(100% - 16px);overflow:auto;line-height:1.5;white-space:normal;overflow-wrap:anywhere}
 .nav-help{font-size:12px;color:#64748b;line-height:1.4}
 .nav-pick-row{display:flex;gap:6px}.nav-pick-row button{flex:1;padding:9px 6px;border:1px solid #cbd5e1;border-radius:8px;background:#eef4ff;color:#1e3a8a;cursor:pointer}.nav-pick-row button.active{background:#2563eb;color:white;border-color:#2563eb}
+
+
+/* Prototype 11: quieter grid and clearer dark floor plan. Viewer/editor share palette. */
+html[data-theme="dark"] #viewport{background-color:#152238!important;background-image:linear-gradient(#26364b 1px,transparent 1px),linear-gradient(90deg,#26364b 1px,transparent 1px)!important;border-color:#455873!important}
+html[data-theme="dark"] #roomTooltip{background:#24364d;color:#f1f5fa;border:1px solid #61758e}
+html[data-theme="dark"] .tree-object.selected{background:#244769}
+html[data-theme="dark"] .tree-group,html[data-theme="dark"] .tree-children{border-color:#34455d}
