@@ -128,11 +128,38 @@ async function loadDatabaseChecks(){
     try{const r=await api("/api/checks"); const checks=r.checks||[]; if(!checks.length){box.innerHTML='<div class="card check-ok"><h3>✓ Ошибок не найдено</h3><p>Основные проверки базы пройдены.</p></div>';return;} box.innerHTML=checks.map(c=>`<div class="card check-card ${c.type}"><h3>${c.type==='error'?'⛔':'⚠️'} ${escapeHTML(c.title)} <span>${c.count}</span></h3><div class="check-items">${(c.items||[]).slice(0,30).map(x=>`<div>${escapeHTML(x)}</div>`).join('')}${c.count>30?`<small>И ещё ${c.count-30}…</small>`:''}</div></div>`).join('');}
     catch(e){box.innerHTML=`<div class="card"><p class="danger-text">${escapeHTML(apiErrorMessage(e))}</p></div>`;}
 }
+let auditItems=[];
 async function loadAuditLog(){
-    const tbody=document.getElementById("auditTable"); if(!tbody)return;
-    tbody.innerHTML='<tr><td colspan="3" class="empty">Загрузка…</td></tr>';
-    try{const r=await api("/api/audit");const items=r.items||[];tbody.innerHTML=items.length?items.map(x=>`<tr><td>${escapeHTML(formatDateTime(x.createdAt))}</td><td><strong>${escapeHTML(x.action)}</strong></td><td>${escapeHTML(x.details||'—')}</td></tr>`).join(''):'<tr><td colspan="3" class="empty">Журнал пока пуст</td></tr>';}
-    catch(e){tbody.innerHTML=`<tr><td colspan="3" class="empty">${escapeHTML(apiErrorMessage(e))}</td></tr>`;}
+    const ids=["auditStudentAdds","auditTeachers","auditChanges","auditLogins"];
+    ids.forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML='<div class="empty">Загрузка…</div>';});
+    try{
+      const r=await api("/api/audit");auditItems=Array.isArray(r.items)?r.items:[];
+      const sel=document.getElementById("auditStudentClassFilter");
+      if(sel){const current=sel.value;sel.innerHTML='<option value="">Все классы</option>'+((db?.classes||[]).slice().sort((a,b)=>a.name.localeCompare(b.name,'ru')).map(c=>'<option value="'+escapeHTML(c.name)+'">'+escapeHTML(c.name)+'</option>').join(''));if([...sel.options].some(o=>o.value===current))sel.value=current;}
+      renderAuditPanels();
+    }catch(e){ids.forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML='<div class="empty">'+escapeHTML(apiErrorMessage(e))+'</div>';});}
+}
+function auditCard(x){
+ const action=escapeHTML(x.action||"Действие"),details=escapeHTML(x.details||"—"),date=escapeHTML(formatDateTime(x.createdAt));
+ return '<article class="audit-entry"><div class="audit-entry-meta"><time>'+date+'</time><strong>'+action+'</strong></div><div class="audit-entry-details">'+details+'</div></article>';
+}
+function auditFill(id,items,countId){
+ const el=document.getElementById(id);if(el)el.innerHTML=items.length?items.map(auditCard).join(''):'<div class="empty">Записей пока нет</div>';
+ const count=document.getElementById(countId);if(count)count.textContent=String(items.length);
+}
+function renderAuditPanels(){
+ const is=(x,...names)=>names.includes(x.action);
+ const additions=auditItems.filter(x=>is(x,"Добавлен ученик"));
+ const cls=document.getElementById("auditStudentClassFilter")?.value||"";
+ const studentAdds=additions.filter(x=>!cls||(x.details||"").includes("· класс "+cls+" ·"));
+ const teachers=auditItems.filter(x=>is(x,"Добавлен преподаватель","Удалён преподаватель"));
+ const changeType=document.getElementById("auditChangeFilter")?.value||"all";
+ const changes=auditItems.filter(x=>is(x,"Изменён ученик","Удалён ученик","Изменён класс","Удалён класс")&&(changeType==="all"||(changeType==="student"&&/ученик/.test(x.action))||(changeType==="class"&&/класс/.test(x.action))));
+ const logins=auditItems.filter(x=>is(x,"Вход в режим администратора"));
+ auditFill("auditStudentAdds",studentAdds,"auditStudentAddCount");
+ auditFill("auditTeachers",teachers,"auditTeacherCount");
+ auditFill("auditChanges",changes,"auditChangesCount");
+ auditFill("auditLogins",logins,"auditLoginCount");
 }
 function formatDateTime(v){if(!v)return '—';const d=new Date(String(v).replace(' ','T')+'Z');return Number.isNaN(d.getTime())?String(v):new Intl.DateTimeFormat('ru-RU',{dateStyle:'short',timeStyle:'medium'}).format(d);}
 function filterClassTeacherOptions(){const q=(document.getElementById('classTeacherSearch')?.value||'').trim().toLocaleLowerCase('kk-KZ');const sel=document.getElementById('classTeacher');if(!sel)return;Array.from(sel.options).forEach((o,i)=>{o.hidden=i>0&&q&&!o.text.toLocaleLowerCase('kk-KZ').includes(q);});}
