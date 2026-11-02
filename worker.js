@@ -442,9 +442,9 @@ async function handleApi(request, env) {
     if (method === "DELETE") {
       await createBackup(env.DB, "Перед удалением ученика");
       await requireAdmin(request, env.DB);
-      const old=await env.DB.prepare("SELECT name,iin FROM students WHERE id=?").bind(studentId).first();
+      const old=await env.DB.prepare("SELECT s.name,s.iin,c.name AS class_name FROM students s LEFT JOIN classes c ON c.id=s.class_id WHERE s.id=?").bind(studentId).first();
       await env.DB.prepare("DELETE FROM students WHERE id=?").bind(studentId).run();
-      await logAction(env.DB,"Удалён ученик",old?`${old.name} · ИИН ${old.iin}`:studentId);
+      await logAction(env.DB,"Удалён ученик",old?`${old.name} · класс ${old.class_name||'не указан'}`:studentId);
       return json({ ok: true });
     }
 
@@ -458,9 +458,10 @@ async function handleApi(request, env) {
     if (!name || !/^\d{12}$/.test(iin) || !classId) return error("Заполните ФИО, корректный ИИН из 12 цифр и класс.");
 
     try {
+      const classInfo=await env.DB.prepare("SELECT name FROM classes WHERE id=?").bind(classId).first();
       await env.DB.prepare(`UPDATE students SET name=?,iin=?,birth_date=?,class_id=?,status=?,note=?,updated_at=CURRENT_TIMESTAMP WHERE id=?`)
         .bind(name, iin, birthDate, classId, status, note, studentId).run();
-      await logAction(env.DB,"Изменён ученик",`${name} · ИИН ${iin}`);
+      await logAction(env.DB,"Изменён ученик",`${name} · класс ${classInfo?.name||'не указан'}`);
       return json({ ok: true });
     } catch (err) {
       return error(isConstraintError(err) ? "Другой ученик уже использует этот ИИН." : "Не удалось изменить ученика.", isConstraintError(err) ? 409 : 500);
