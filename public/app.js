@@ -134,8 +134,8 @@ async function loadAuditLog(){
     ids.forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML='<div class="empty">Загрузка…</div>';});
     try{
       const r=await api("/api/audit");auditItems=Array.isArray(r.items)?r.items:[];
-      const sel=document.getElementById("auditStudentClassFilter");
-      if(sel){const current=sel.value;sel.innerHTML='<option value="">Все классы</option>'+((db?.classes||[]).slice().sort((a,b)=>a.name.localeCompare(b.name,'ru')).map(c=>'<option value="'+escapeHTML(c.name)+'">'+escapeHTML(c.name)+'</option>').join(''));if([...sel.options].some(o=>o.value===current))sel.value=current;}
+      // The class filter is a compact button group, not a native SELECT.
+      // Build its chips from the current class records and then render all panels.
       renderAuditPanels();
     }catch(e){ids.forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML='<div class="empty">'+escapeHTML(apiErrorMessage(e))+'</div>';});}
 }
