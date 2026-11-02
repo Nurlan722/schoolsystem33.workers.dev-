@@ -189,8 +189,13 @@
         </section>
 
         <section id="audit" class="page">
-            <div class="page-heading"><div><h2>Журнал действий</h2><p>Последние изменения и опасные операции с базой</p></div><button class="btn btn-secondary" onclick="loadAuditLog()">↻ Обновить</button></div>
-            <div class="card"><div class="table-wrap"><table><thead><tr><th>Дата и время</th><th>Действие</th><th>Подробности</th></tr></thead><tbody id="auditTable"></tbody></table></div></div>
+            <div class="page-heading"><div><h2>Журнал действий</h2><p>Контроль добавлений, изменений, удалений и входов администратора</p></div><button class="btn btn-secondary" onclick="loadAuditLog()">↻ Обновить</button></div>
+            <div class="audit-dashboard">
+              <section class="card audit-panel"><div class="audit-panel-head"><div><h3>Добавление учеников</h3><p>Новые записи с разбивкой по классам</p></div><span class="audit-count" id="auditStudentAddCount">0</span></div><label class="audit-filter">Класс<select id="auditStudentClassFilter" class="input" onchange="renderAuditPanels()"><option value="">Все классы</option></select></label><div class="audit-list" id="auditStudentAdds"><div class="empty">Загрузка…</div></div></section>
+              <section class="card audit-panel"><div class="audit-panel-head"><div><h3>Преподаватели</h3><p>Добавление и удаление преподавателей</p></div><span class="audit-count" id="auditTeacherCount">0</span></div><div class="audit-list" id="auditTeachers"><div class="empty">Загрузка…</div></div></section>
+              <section class="card audit-panel"><div class="audit-panel-head"><div><h3>Изменения учеников и классов</h3><p>Изменения и удаления — с выбором типа записей</p></div><span class="audit-count" id="auditChangesCount">0</span></div><label class="audit-filter">Показывать<select id="auditChangeFilter" class="input" onchange="renderAuditPanels()"><option value="all">Ученики и классы</option><option value="student">Только ученики</option><option value="class">Только классы</option></select></label><div class="audit-list" id="auditChanges"><div class="empty">Загрузка…</div></div></section>
+              <section class="card audit-panel"><div class="audit-panel-head"><div><h3>Входы администратора</h3><p>История включения режима администратора</p></div><span class="audit-count" id="auditLoginCount">0</span></div><div class="audit-list" id="auditLogins"><div class="empty">Загрузка…</div></div></section>
+            </div>
         </section>
 
         <section id="promotion" class="page">
