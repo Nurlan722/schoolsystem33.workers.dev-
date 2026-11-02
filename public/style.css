@@ -231,3 +231,14 @@ body:has(.sidebar.is-pinned) .main{margin-left:250px}
 #calendar.active .cal-inline-week .cal-week-cell small{overflow-wrap:anywhere}
 @media(max-width:1100px){#calendar.active .calendar-one{grid-template-columns:1fr}#calendar.active .cal-inline-week .cal-week-cell{min-height:110px}}
 @media(max-width:620px){#calendar.active .calendar-switch{justify-content:flex-start}#calendar.active .calendar-switch #calendarMonth{margin-left:0}#calendar.active .cal-inline-week .cal-week-grid{gap:2px}#calendar.active .cal-inline-week .cal-week-cell{min-height:100px;padding:7px 1px}#calendar.active .cal-inline-week .cal-week-cell span{font-size:16px}}
+
+
+/* Four-panel activity journal */
+.audit-dashboard{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:minmax(260px,1fr) minmax(260px,1fr);gap:16px;align-items:stretch}
+.audit-panel{min-width:0;display:flex;flex-direction:column;gap:12px;min-height:300px;padding:18px}
+.audit-panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.audit-panel-head h3{margin:0 0 5px;font-size:16px}.audit-panel-head p{margin:0;color:var(--muted,#8da0b8);font-size:12px;line-height:1.4}
+.audit-count{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;padding:0 8px;border-radius:9px;background:var(--surface-2,#26364b);font-weight:700;font-variant-numeric:tabular-nums}
+.audit-filter{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted,#8da0b8)}.audit-filter .input{max-width:190px;min-height:34px;padding:6px 10px}
+.audit-list{min-height:0;flex:1;max-height:340px;overflow:auto;border-top:1px solid var(--border,#304158);scrollbar-width:thin}
+.audit-entry{padding:10px 3px;border-bottom:1px solid var(--border,#304158);display:grid;gap:5px}.audit-entry-meta{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px;font-size:12px}.audit-entry-meta time{color:var(--muted,#8da0b8);font-variant-numeric:tabular-nums}.audit-entry-meta strong{font-size:12px}.audit-entry-details{font-size:12px;line-height:1.5;overflow-wrap:anywhere;color:var(--text,#e8eef7)}
+@media(max-width:900px){.audit-dashboard{grid-template-columns:minmax(0,1fr);grid-template-rows:auto}.audit-panel{min-height:250px}.audit-list{max-height:300px}}
