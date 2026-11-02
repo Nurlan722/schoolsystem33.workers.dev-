@@ -233,12 +233,17 @@ body:has(.sidebar.is-pinned) .main{margin-left:250px}
 @media(max-width:620px){#calendar.active .calendar-switch{justify-content:flex-start}#calendar.active .calendar-switch #calendarMonth{margin-left:0}#calendar.active .cal-inline-week .cal-week-grid{gap:2px}#calendar.active .cal-inline-week .cal-week-cell{min-height:100px;padding:7px 1px}#calendar.active .cal-inline-week .cal-week-cell span{font-size:16px}}
 
 
-/* Four-panel activity journal */
-.audit-dashboard{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:minmax(260px,1fr) minmax(260px,1fr);gap:16px;align-items:stretch}
-.audit-panel{min-width:0;display:flex;flex-direction:column;gap:12px;min-height:300px;padding:18px}
-.audit-panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.audit-panel-head h3{margin:0 0 5px;font-size:16px}.audit-panel-head p{margin:0;color:var(--muted,#8da0b8);font-size:12px;line-height:1.4}
-.audit-count{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;padding:0 8px;border-radius:9px;background:var(--surface-2,#26364b);font-weight:700;font-variant-numeric:tabular-nums}
-.audit-filter{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted,#8da0b8)}.audit-filter .input{max-width:190px;min-height:34px;padding:6px 10px}
-.audit-list{min-height:0;flex:1;max-height:340px;overflow:auto;border-top:1px solid var(--border,#304158);scrollbar-width:thin}
-.audit-entry{padding:10px 3px;border-bottom:1px solid var(--border,#304158);display:grid;gap:5px}.audit-entry-meta{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px;font-size:12px}.audit-entry-meta time{color:var(--muted,#8da0b8);font-variant-numeric:tabular-nums}.audit-entry-meta strong{font-size:12px}.audit-entry-details{font-size:12px;line-height:1.5;overflow-wrap:anywhere;color:var(--text,#e8eef7)}
-@media(max-width:900px){.audit-dashboard{grid-template-columns:minmax(0,1fr);grid-template-rows:auto}.audit-panel{min-height:250px}.audit-list{max-height:300px}}
+/* Compact four-panel activity journal */
+.audit-dashboard{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:10px;height:calc(100vh - 190px);min-height:560px;max-height:900px;align-items:stretch;overflow:hidden}
+.audit-panel{min-width:0;min-height:0!important;display:flex;flex-direction:column;gap:7px;padding:11px!important;overflow:hidden}
+.audit-panel-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.audit-panel-head h3{margin:0 0 2px;font-size:14px;line-height:1.2}.audit-panel-head p{margin:0;color:var(--muted,#8da0b8);font-size:10px;line-height:1.25}
+.audit-count{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:25px;padding:0 7px;border-radius:8px;background:var(--surface-2,#26364b);font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
+.audit-class-chips{display:flex;align-items:center;gap:4px;flex-wrap:wrap;max-height:48px;overflow:auto;padding:1px 0;scrollbar-width:thin}
+.audit-chip{border:1px solid var(--border,#304158);background:var(--surface-2,#202d40);color:var(--text,#e8eef7);border-radius:5px;padding:2px 6px;min-width:22px;min-height:20px;font-size:9px;line-height:1.1;cursor:pointer}
+.audit-chip.active{background:var(--accent,#3b82f6);border-color:var(--accent,#3b82f6);color:#fff}
+.audit-list{min-height:0;flex:1;max-height:none;overflow:auto;border-top:1px solid var(--border,#304158);scrollbar-width:thin}
+.audit-entry{padding:6px 7px;margin:5px 0;border:1px solid var(--border,#304158);border-radius:7px;background:var(--surface-2,rgba(35,49,68,.55));display:grid;gap:3px}
+.audit-entry-top{display:flex;align-items:center;justify-content:space-between;gap:7px}.audit-entry-top strong{font-size:10px;line-height:1.2}.audit-entry-top time{flex:none;color:var(--muted,#8da0b8);font-size:9px;font-variant-numeric:tabular-nums}
+.audit-entry-details{font-size:10px;line-height:1.3;overflow-wrap:anywhere;color:var(--text,#e8eef7)}
+.audit-entry-card.added{border-left:3px solid #22a06b}.audit-entry-card.deleted{border-left:3px solid #dc6262}.audit-entry-card.changed{border-left:3px solid #d6a34a}
+@media(max-width:900px){.audit-dashboard{height:auto;max-height:none;min-height:0;grid-template-columns:minmax(0,1fr);grid-template-rows:none;overflow:visible}.audit-panel{height:330px}.audit-list{max-height:none}}
