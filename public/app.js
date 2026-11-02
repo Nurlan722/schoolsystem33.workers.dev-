@@ -140,7 +140,7 @@ async function loadAuditLog(){
     }catch(e){ids.forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML='<div class="empty">'+escapeHTML(apiErrorMessage(e))+'</div>';});}
 }
 function auditCard(x){
- const action=escapeHTML(x.action||"Действие"),details=escapeHTML(x.details||"—"),date=escapeHTML(formatDateTime(x.createdAt));
+ const action=escapeHTML(x.action||"Действие"),details=escapeHTML(x.details||"—").replace(/ИИН\\s*\\d{12}/g,"ИИН скрыт"),date=escapeHTML(formatDateTime(x.createdAt));
  return '<article class="audit-entry"><div class="audit-entry-meta"><time>'+date+'</time><strong>'+action+'</strong></div><div class="audit-entry-details">'+details+'</div></article>';
 }
 function auditFill(id,items,countId){
