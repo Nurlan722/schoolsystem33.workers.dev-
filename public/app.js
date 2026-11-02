@@ -139,22 +139,40 @@ async function loadAuditLog(){
       renderAuditPanels();
     }catch(e){ids.forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML='<div class="empty">'+escapeHTML(apiErrorMessage(e))+'</div>';});}
 }
+let auditSelectedClass="";
+let auditSelectedChange="all";
 function auditCard(x){
  const action=escapeHTML(x.action||"Действие"),details=escapeHTML(x.details||"—").replace(/ИИН\\s*\\d{12}/g,"ИИН скрыт"),date=escapeHTML(formatDateTime(x.createdAt));
- return '<article class="audit-entry"><div class="audit-entry-meta"><time>'+date+'</time><strong>'+action+'</strong></div><div class="audit-entry-details">'+details+'</div></article>';
+ const kind=/Добавлен/.test(x.action||"")?"added":/Удалён/.test(x.action||"")?"deleted":"changed";
+ return '<article class="audit-entry audit-entry-card '+kind+'"><div class="audit-entry-top"><strong>'+action+'</strong><time>'+date+'</time></div><div class="audit-entry-details">'+details+'</div></article>';
 }
 function auditFill(id,items,countId){
  const el=document.getElementById(id);if(el)el.innerHTML=items.length?items.map(auditCard).join(''):'<div class="empty">Записей пока нет</div>';
  const count=document.getElementById(countId);if(count)count.textContent=String(items.length);
 }
+function selectAuditClass(button){
+ auditSelectedClass=button.dataset.class||"";
+ document.querySelectorAll("#auditStudentClassFilter .audit-chip").forEach(x=>x.classList.toggle("active",x===button));
+ renderAuditPanels();
+}
+function selectAuditChange(button){
+ auditSelectedChange=button.dataset.filter||"all";
+ document.querySelectorAll("#auditChangeFilter .audit-chip").forEach(x=>x.classList.toggle("active",x===button));
+ renderAuditPanels();
+}
+function renderAuditClassChips(){
+ const wrap=document.getElementById("auditStudentClassFilter");if(!wrap)return;
+ const classes=(db?.classes||[]).map(c=>c.name).filter(Boolean).sort((a,b)=>a.localeCompare(b,"ru",{numeric:true}));
+ wrap.innerHTML='<button type="button" class="audit-chip '+(!auditSelectedClass?'active':'')+'" data-class="" onclick="selectAuditClass(this)">Все</button>'+classes.map(name=>'<button type="button" class="audit-chip '+(name===auditSelectedClass?'active':'')+'" data-class="'+escapeHTML(name)+'" title="Класс '+escapeHTML(name)+'" onclick="selectAuditClass(this)">'+escapeHTML(name)+'</button>').join('');
+ if(auditSelectedClass&&!classes.includes(auditSelectedClass))auditSelectedClass="";
+}
 function renderAuditPanels(){
  const is=(x,...names)=>names.includes(x.action);
+ renderAuditClassChips();
  const additions=auditItems.filter(x=>is(x,"Добавлен ученик"));
- const cls=document.getElementById("auditStudentClassFilter")?.value||"";
- const studentAdds=additions.filter(x=>!cls||(x.details||"").includes("· класс "+cls+" ·"));
+ const studentAdds=additions.filter(x=>!auditSelectedClass||(x.details||"").includes("· класс "+auditSelectedClass+" ·"));
  const teachers=auditItems.filter(x=>is(x,"Добавлен преподаватель","Удалён преподаватель"));
- const changeType=document.getElementById("auditChangeFilter")?.value||"all";
- const changes=auditItems.filter(x=>is(x,"Изменён ученик","Удалён ученик","Изменён класс","Удалён класс")&&(changeType==="all"||(changeType==="student"&&/ученик/.test(x.action))||(changeType==="class"&&/класс/.test(x.action))));
+ const changes=auditItems.filter(x=>is(x,"Изменён ученик","Удалён ученик","Изменён класс","Удалён класс")&&(auditSelectedChange==="all"||(auditSelectedChange==="student"&&/ученик/.test(x.action))||(auditSelectedChange==="class"&&/класс/.test(x.action))));
  const logins=auditItems.filter(x=>is(x,"Вход в режим администратора"));
  auditFill("auditStudentAdds",studentAdds,"auditStudentAddCount");
  auditFill("auditTeachers",teachers,"auditTeacherCount");
